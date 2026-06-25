@@ -1,9 +1,26 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
+}
+
+function PWARegistration() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/sw.js');
+            });
+          }
+        `,
+      }}
+    />
+  );
 }
 
 export default async function LocaleLayout({
@@ -19,7 +36,9 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
+      <PWARegistration />
       {children}
+      <InstallPrompt />
     </NextIntlClientProvider>
   );
 }
