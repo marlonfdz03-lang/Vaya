@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { VayaLogo } from "@/components/VayaLogo";
 
 type Stage = "offline" | "online" | "incoming" | "accepted" | "arrived_pickup" | "inprogress" | "completed" | "history";
@@ -55,6 +56,28 @@ function MapPlaceholder() {
 export default function DrivePage() {
   const t = useTranslations("drive");
   const { locale } = useParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    async function checkStatus() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return router.push(`/${locale}/sign-in`);
+
+      const { data: profile } = await supabase
+        .from("driver_profiles")
+        .select("status")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile || profile.status === "incomplete") {
+        router.push(`/${locale}/drive/onboarding`);
+      }
+      if (profile?.status === "pending") {
+        router.push(`/${locale}/drive/onboarding`);
+      }
+    }
+    checkStatus();
+  }, []);
 
   const [stage, setStage] = useState<Stage>("offline");
   const [earnings, setEarnings] = useState(0);
