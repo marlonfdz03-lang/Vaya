@@ -11,78 +11,108 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <main className="relative min-h-screen max-w-sm mx-auto px-6">
-      <div className="absolute top-6 right-6">
-        <select
-          defaultValue={locale as string}
-          onChange={(e) => router.push(`/${e.target.value}`)}
-          className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 bg-white"
-        >
-          <option value="es">🌐 ES</option>
-          <option value="en">🌐 EN</option>
-        </select>
-      </div>
-
-      <div className="pt-12 text-center">
-        <div className="flex justify-center mb-6">
-          <VayaLogo size={40} />
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between px-6 md:px-12 py-5 bg-white border-b border-slate-100">
+        <VayaLogo size={36} />
+        <div className="flex items-center gap-4">
+          <select
+            defaultValue={locale as string}
+            onChange={(e) => router.push(`/${e.target.value}`)}
+            className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 bg-white"
+          >
+            <option value="es">🌐 ES</option>
+            <option value="en">🌐 EN</option>
+          </select>
+          <Link
+            href={`/${locale}/sign-in`}
+            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+          >
+            Iniciar sesión
+          </Link>
         </div>
+      </nav>
 
-        <h1 className="text-3xl font-bold mb-3 text-slate-900">
-          {t("tagline")}{" "}
-          <span className="text-gradient">
-            {t("tagline_highlight")}
+      {/* Hero */}
+      <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-12 md:py-16 bg-white min-h-[80vh] overflow-hidden gap-10">
+        {/* Left column */}
+        <div className="flex-1 max-w-lg">
+          <span className="inline-block bg-emerald-50 text-emerald-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+            Tu viaje, a tu manera
           </span>
-        </h1>
-        <p className="text-slate-500 text-sm mb-6">{t("subtitle")}</p>
-
-        <div className="flex flex-col gap-3 mb-6">
-          <Link
-            href={`/${locale}/ride`}
-            className="py-4 rounded-2xl btn-primary text-white font-semibold"
-          >
-            📍 {t("btn_rider")}
-          </Link>
-          <Link
-            href={`/${locale}/drive`}
-            className="py-4 rounded-2xl border-2 border-blue-600 text-blue-600 font-semibold"
-          >
-            🚗 {t("btn_driver")}
-          </Link>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 leading-tight mb-4">
+            Muévete<br />
+            <span className="bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">
+              con Vaya
+            </span>
+          </h1>
+          <p className="text-slate-500 text-lg leading-relaxed mb-8 max-w-md">
+            Viajes seguros, confiables y al mejor precio. Pide un ride en segundos o empieza a conducir y gana en tus tiempos.
+          </p>
+          <div className="flex items-center gap-3 mb-8">
+            <Link
+              href={`/${locale}/ride`}
+              className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-all"
+            >
+              🚗 Pedir ride
+            </Link>
+            <Link
+              href={`/${locale}/drive`}
+              className="flex items-center gap-2 px-6 py-3.5 rounded-xl border-2 border-emerald-500 text-emerald-600 font-semibold text-sm hover:bg-emerald-50 transition-all"
+            >
+              🎯 Conducir
+            </Link>
+          </div>
+          <p className="text-sm text-slate-400">
+            ¿Ya tienes cuenta?{" "}
+            <Link href={`/${locale}/sign-in`} className="text-blue-600 font-semibold">
+              Iniciar sesión
+            </Link>
+          </p>
         </div>
 
-        <div className="w-full rounded-2xl overflow-hidden border border-slate-100 shadow-sm mb-6" style={{ height: 220 }}>
+        {/* Right column — map image, hidden on mobile */}
+        <div className="hidden md:flex flex-1 justify-end">
           <img
             src="/map-preview.png"
-            alt="Map preview"
-            className="w-full h-full object-cover"
+            alt="Mapa"
+            className="w-full max-w-lg rounded-3xl object-cover shadow-xl"
           />
         </div>
+      </section>
 
-        <div className="grid grid-cols-2 gap-3 w-full mb-8">
+      {/* Features */}
+      <section className="px-6 md:px-12 py-16 bg-slate-50">
+        <div className="text-center mb-12">
+          <p className="text-emerald-600 text-sm font-semibold mb-2">¿Por qué Vaya?</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Hecho para ti</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {[
-            { icon: "⚡", title: t("feature_fast"), desc: t("feature_fast_desc"), bg: "bg-blue-50" },
-            { icon: "🛡️", title: t("feature_safe"), desc: t("feature_safe_desc"), bg: "bg-emerald-50" },
-            { icon: "💰", title: t("feature_price"), desc: t("feature_price_desc"), bg: "bg-blue-50" },
-            { icon: "⭐", title: t("feature_reviews"), desc: t("feature_reviews_desc"), bg: "bg-emerald-50" },
+            { icon: "🛡️", title: "Viajes seguros", desc: "Tu seguridad es nuestra prioridad. Conductores verificados y viajes monitoreados.", color: "bg-blue-50" },
+            { icon: "⚡", title: "Rápido y fácil", desc: "Pide tu ride en segundos y llega a tu destino sin complicaciones.", color: "bg-emerald-50" },
+            { icon: "💳", title: "Precios justos", desc: "Tarifas transparentes sin cobros ocultos. Sabrás el precio antes de viajar.", color: "bg-blue-50" },
+            { icon: "🎧", title: "Soporte 24/7", desc: "Estamos aquí para ayudarte en cualquier momento.", color: "bg-emerald-50" },
           ].map((f) => (
-            <div key={f.title} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm text-left">
-              <div className={`w-10 h-10 rounded-xl ${f.bg} flex items-center justify-center text-xl mb-3`}>
+            <div key={f.title} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm text-center">
+              <div className={`w-14 h-14 ${f.color} rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4`}>
                 {f.icon}
               </div>
-              <p className="font-semibold text-sm text-slate-800">{f.title}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{f.desc}</p>
+              <h3 className="font-bold text-slate-800 mb-2">{f.title}</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
+      </section>
 
-        <p className="text-sm text-slate-500 pb-10">
-          {t("login")}{" "}
-          <Link href={`/${locale}/sign-in`} className="text-blue-600 font-semibold">
-            {t("login_link")}
-          </Link>
-        </p>
-      </div>
-    </main>
+      {/* City footer */}
+      <section className="relative overflow-hidden bg-white">
+        <img
+          src="/city-miami.png"
+          alt="Miami"
+          className="w-full object-cover h-64"
+        />
+      </section>
+    </div>
   );
 }

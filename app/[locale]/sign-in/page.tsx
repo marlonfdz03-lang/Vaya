@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { VayaLogo } from "@/components/VayaLogo";
 
 export default function SignInPage() {
@@ -53,35 +53,59 @@ export default function SignInPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col justify-center max-w-sm mx-auto px-6 py-10">
-      {/* Logo */}
-      <div className="flex justify-center mb-8">
-        <Link href={`/${locale}`}>
-          <VayaLogo size={36} />
-        </Link>
+    <main className="min-h-screen max-w-sm mx-auto flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 pt-6">
+        <button onClick={() => router.back()} className="text-slate-400 text-xl">←</button>
+        <select
+          defaultValue={locale as string}
+          onChange={(e) => router.push(`/${e.target.value}/sign-in`)}
+          className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 bg-white"
+        >
+          <option value="es">🌐 ES</option>
+          <option value="en">🌐 EN</option>
+        </select>
       </div>
 
-      {/* Tab toggle */}
-      <div className="flex bg-slate-100 rounded-xl p-1 mb-6">
-        <button
-          onClick={() => switchMode("signin")}
-          className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-            mode === "signin" ? "bg-blue-600 text-white" : "text-slate-500"
-          }`}
-        >
-          {t("sign_in")}
-        </button>
-        <button
-          onClick={() => switchMode("signup")}
-          className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-            mode === "signup" ? "bg-blue-600 text-white" : "text-slate-500"
-          }`}
-        >
-          {t("sign_up")}
-        </button>
+      {/* Logo + title */}
+      <div className="text-center py-6">
+        <div className="flex justify-center">
+          <VayaLogo size={56} />
+        </div>
+        <h1 className="text-2xl font-bold text-slate-900 mt-4">
+          {mode === "signup" ? "Crea tu cuenta" : "Bienvenido de nuevo"}
+        </h1>
+        <p className="text-sm text-slate-400 mt-1">
+          {mode === "signup" ? "Únete a Vaya y empieza hoy." : "Inicia sesión para continuar."}
+        </p>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="px-6 flex flex-col gap-4">
+        {/* Toggle */}
+        <div className="flex bg-slate-100 rounded-2xl p-1 mb-2">
+          {(["signin", "signup"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => switchMode(m)}
+              className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all ${
+                mode === m ? "" : "text-slate-400"
+              }`}
+              style={mode === m ? {
+                background: "white",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                backgroundImage: "linear-gradient(to right, #0A58F5, #28D67C)",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                borderRadius: "12px",
+                color: "transparent",
+              } : {}}
+            >
+              {m === "signin" ? "Iniciar sesión" : "Crear cuenta"}
+            </button>
+          ))}
+        </div>
+
         {/* Name — signup only */}
         {mode === "signup" && (
           <div className="relative">
@@ -131,6 +155,13 @@ export default function SignInPage() {
           </button>
         </div>
 
+        {/* Password hint — signup only */}
+        {mode === "signup" && (
+          <p className="text-xs text-slate-400 -mt-2">
+            Mínimo 8 caracteres, con mayúsculas, minúsculas, números y símbolos.
+          </p>
+        )}
+
         {/* Forgot password — signin only */}
         {mode === "signin" && (
           <div className="text-right -mt-2">
@@ -138,27 +169,34 @@ export default function SignInPage() {
           </div>
         )}
 
-        {/* Role cards — signup only */}
+        {/* Role selector — signup only */}
         {mode === "signup" && (
           <div>
-            <p className="text-sm font-medium text-slate-600 mb-2">¿Cómo vas a usar Vaya?</p>
-            <div className="grid grid-cols-2 gap-3">
+            <p className="text-sm font-semibold text-slate-700 mb-3">¿Cómo quieres usar Vaya?</p>
+            <div className="flex flex-col gap-2">
               {[
-                { id: "rider", icon: "📍", label: "Pedir rides", desc: "Viaja de forma rápida y segura" },
-                { id: "driver", icon: "🚗", label: "Manejar y ganar", desc: "Conduce y gana dinero" },
+                { id: "rider", icon: "🚗", label: "Pedir rides", desc: "Viaja de forma segura y cómoda.", color: "bg-blue-50" },
+                { id: "driver", icon: "🎯", label: "Manejar y ganar", desc: "Conduce cuando quieras y gana dinero.", color: "bg-emerald-50" },
               ].map((r) => (
                 <button
                   key={r.id}
                   onClick={() => setRole(r.id as "rider" | "driver")}
-                  className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                    role === r.id
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-slate-200 bg-white"
+                  className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
+                    role === r.id ? "border-blue-500 bg-blue-50/30" : "border-slate-200 bg-white"
                   }`}
                 >
-                  <span className="text-2xl block mb-2">{r.icon}</span>
-                  <p className="font-semibold text-sm text-slate-800">{r.label}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{r.desc}</p>
+                  <div className={`w-12 h-12 ${r.color} rounded-2xl flex items-center justify-center text-2xl flex-shrink-0`}>
+                    {r.icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-800 text-sm">{r.label}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{r.desc}</p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                    role === r.id ? "border-blue-500" : "border-slate-300"
+                  }`}>
+                    {role === r.id && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
+                  </div>
                 </button>
               ))}
             </div>
@@ -177,9 +215,9 @@ export default function SignInPage() {
         <button
           onClick={submit}
           disabled={loading}
-          className="w-full py-4 rounded-2xl btn-primary text-white font-semibold text-sm disabled:opacity-60"
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold text-base disabled:opacity-40 shadow-lg shadow-blue-200"
         >
-          {loading ? "..." : mode === "signin" ? t("btn_signin") : t("btn_signup")}
+          {loading ? "..." : mode === "signup" ? "Crear cuenta" : "Entrar"}
         </button>
 
         {/* Divider */}
@@ -190,12 +228,37 @@ export default function SignInPage() {
         </div>
 
         {/* Social buttons */}
-        <button className="w-full py-3 rounded-xl border border-slate-200 bg-white flex items-center justify-center gap-2 text-sm font-medium text-slate-700">
-          <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" /> Continuar con Google
-        </button>
-        <button className="w-full py-3 rounded-xl border border-slate-200 bg-white flex items-center justify-center gap-2 text-sm font-medium text-slate-700">
-          🍎 Continuar con Apple
-        </button>
+        <div className="grid grid-cols-2 gap-3">
+          <button className="flex items-center justify-center gap-2 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700">
+            <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" /> Google
+          </button>
+          <button className="flex items-center justify-center gap-2 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700">
+            🍎 Apple
+          </button>
+        </div>
+
+        {/* Footer toggle */}
+        <p className="text-center text-sm text-slate-400 pb-8">
+          {mode === "signup" ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
+          <button
+            onClick={() => switchMode(mode === "signup" ? "signin" : "signup")}
+            className="text-blue-600 font-semibold"
+          >
+            {mode === "signup" ? "Iniciar sesión" : "Regístrate"}
+          </button>
+        </p>
+
+        {/* Spacer so content isn't hidden behind city illustration */}
+        <div className="pb-36" />
+      </div>
+
+      {/* Fixed bottom city illustration */}
+      <div className="fixed bottom-0 left-0 right-0 pointer-events-none">
+        <img
+          src="/city-miami.png"
+          alt=""
+          className="w-full object-cover object-top h-32 opacity-90"
+        />
       </div>
     </main>
   );
